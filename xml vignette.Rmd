@@ -23,16 +23,22 @@ Extensible Markup Language (XML) is a means of storing data on the internet so t
 
 # R Packages for XML Data
 
-For reading XML data into R the package `xml2()` can be used. The `xml2()` package has several [improvements](https://www.rdocumentation.org/packages/xml2/versions/1.2.0) over the `xml()` package and thus would be more favorable. For instance, `xml2()` automatically frees memory used by an XML document, it doesn't require the user to know the exact type of object they have, and it more conveniently handles namespaces in Xpath expression than `xml()`. 
+For reading XML data into R the package `XML()` can be used. 
 
 # XML Data Set
 
 ```{r read in data}
-install.packages("xml2", repos="http://cran.us.r-project.org")
-library(xml2)
-library(plyr)
 
+install.packages("XML", repos="http://cran.us.r-project.org")
+library(XML)
 
+#bring in xml data 
+drugData <- xmlParse("http://data.cdc.gov/api/views/jx6g-fdh6/rows.xml?accessType=DOWNLOAD")
 
+#make into data frame
+drugDataFrame<-xmlToDataFrame(nodes=getNodeSet(drugData,"//response/row/row"))[c("year", "sex","age","race_hispanic_origin","state","deaths","population","crude_death_rate","standard_error_for_crude_rate","low_confidence_limit_for_crude_rate","upper_confidence_limit_for_crude_rate","us_crude_rate","us_age_adjusted_rate")]
+
+library(knitr)
+knitr::kable(head(drugDataFrame))
 ```
 
