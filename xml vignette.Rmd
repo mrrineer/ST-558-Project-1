@@ -27,7 +27,10 @@ For reading XML data into R the package `XML()` can be used.
 
 # XML Data Set
 
-```{r read in data}
+The data set pertains to drug poisoning deaths at the U.S. and sate level. The [data set](https://catalog.data.gov/dataset/drug-poisoning-mortality-u-s-and-state-trends-united-states-20022014) was published by the Centers for Disease Control and Prevention.  
+
+
+```{r read in data, include=FALSE}
 
 install.packages("XML", repos="http://cran.us.r-project.org")
 library(XML)
@@ -38,7 +41,35 @@ drugData <- xmlParse("http://data.cdc.gov/api/views/jx6g-fdh6/rows.xml?accessTyp
 #make into data frame
 drugDataFrame<-xmlToDataFrame(nodes=getNodeSet(drugData,"//response/row/row"))[c("year", "sex","age","race_hispanic_origin","state","deaths","population","crude_death_rate","standard_error_for_crude_rate","low_confidence_limit_for_crude_rate","upper_confidence_limit_for_crude_rate","us_crude_rate","us_age_adjusted_rate")]
 
+drugDataFrame<-transform(drugDataFrame, year=as.numeric(year), deaths=as.numeric(deaths), population=as.numeric(population), crude_death_rate=as.numeric(crude_death_rate))
+str(drugDataFrame)
+```
+
+# Data Exploration
+
+Data analysis to determine if a difference between sex and drug poisonings exists amongst all ages and all races. 
+
+```{r data exploration}
 library(knitr)
-knitr::kable(head(drugDataFrame))
+library(dplyr)
+
+#subset data (females)
+females<-drugDataFrame %>% select( year,sex,age,race_hispanic_origin,deaths,population,crude_death_rate) %>% filter(race_hispanic_origin=="All Races-All Origins")%>% filter(sex=="Female") %>% filter(age=="All Ages") %>% arrange(year) 
+
+#subset data (males)
+males<-drugDataFrame %>% select( year,sex,age,race_hispanic_origin,deaths,population,crude_death_rate) %>% filter(race_hispanic_origin=="All Races-All Origins")%>% filter(sex=="Male") %>% filter(age=="All Ages") %>% arrange(year) 
+
+#combine females and males into new data frame with desired data
+allSexes<-cbind(females,males)
+
+#rename columns
+names(allSexes)[7]<-"crude_death_rate_females"
+names(allSexes)[14]<-"crude_death_rate_males"
+
+#create new variable 
+allSexes$diff_in_female_vs_male_crude_death_rate<-allSexes$crude_death_rate_females - allSexes$crude_death_rate_males
+
+knitr::kable(allSexes)
+
 ```
 
