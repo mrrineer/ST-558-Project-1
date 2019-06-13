@@ -7,11 +7,15 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## What is JSON
+## Introduction to JSON
+
+JavaScript Object Notation (JSON) is a syntax for storing and exchanging data. It is important to note that JSON _is_ text -- text that has been written in Javascript Object Notation. What this means is that we can convert any Javascript object in JSON, and convert any JSON received into a Javascript object. For this reason, Javascript is commonly used in web development, where data is being exchanged between a browser and a server. Another important result of JSON being text is that it makes it language independent. This is because the text itself can be used by any programming language.   [W3schools](https://www.w3schools.com/js/js_json_intro.asp). For this reason, it is possible to work with JSON data within R.
 
 Describe your type of data (JSON or XML). What is it, where does it get used, and why is it a good
 way to store data? This should be detailed enough that someone that hasn’t seen that type of idea
 would have a good idea what they are dealing with. You should link to references where applicable.
+
+
 
 ```{r cars}
 
@@ -20,6 +24,10 @@ would have a good idea what they are dealing with. You should link to references
 ## R packages
 
 Discussion of possible packages/functions that are available for reading your type of data into R. Choose one and explain why you’ve chosen it.
+
+Three popular packages for working with JSON data in R are [`jsonlite`](https://cran.r-project.org/package=jsonlite), [`RJSONIO`](https://cran.r-project.org/web/packages/RJSONIO/) and [`rjson`](https://cran.r-project.org/web/packages/rjson/). 
+
+I have chosen to work with the `jsonlite` package as it has been optimized for statistical data and the web. It also has very good documentation and lots of good examples on the web. More information on some of the differences between these three packages can be found [by clicking here](https://rstudio-pubs-static.s3.amazonaws.com/31702_9c22e3d1a0c44968a4a1f9656f1800ab.html).
 
 ```{r pressure, echo=FALSE}
 
@@ -31,6 +39,11 @@ Discussion of possible packages/functions that are available for reading your ty
 
 Find a dataset of your type (JSON or XML) and describe where you found the data, how the data was
 collected, what the variables are, etc.
+
+The dataset I chose to use is one containing reported fireball events from NASA. According to [the documentation](https://cneos.jpl.nasa.gov/fireballs/intro.html), "*fireballs* and *bolides* are astronomical terms for exceptionally bright meteors that are spectacular enough to to be seen over a very wide area". The data was collected from U.S. government sensors. It is not meant to be a complete list, as only the brightest fireballs are noted. 
+
+The variables include information on the date and time of each fireball event, its geographic location, its altitude and velocity at peak brightness, its approximate total optical radiated energy and its calculated total impact energy. More information can be found on NASA's [description page](https://cneos.jpl.nasa.gov/fireballs/intro.html) as well on on the [API documentation page](https://ssd-api.jpl.nasa.gov/doc/fireball.html).
+
 
 ### Reading in the data
 
@@ -50,4 +63,10 @@ variables
 – You should create some plots (at least a side-by-side bar plot, side-by-side box plots, and scatter
 plots with coloring)
 
-
+```{r}
+library(jsonlite)
+fire <- fromJSON("https://ssd-api.jpl.nasa.gov/fireball.api")
+cols <- fire$fields
+fire <- data.frame(fire$data,stringsAsFactors = FALSE)
+colnames(fire) <- cols
+```
