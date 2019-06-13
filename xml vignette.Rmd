@@ -41,6 +41,7 @@ drugData <- xmlParse("http://data.cdc.gov/api/views/jx6g-fdh6/rows.xml?accessTyp
 #make into data frame
 drugDataFrame<-xmlToDataFrame(nodes=getNodeSet(drugData,"//response/row/row"))[c("year", "sex","age","race_hispanic_origin","state","deaths","population","crude_death_rate","standard_error_for_crude_rate","low_confidence_limit_for_crude_rate","upper_confidence_limit_for_crude_rate","us_crude_rate","us_age_adjusted_rate")]
 
+#make columns appropriate objects
 drugDataFrame<-transform(drugDataFrame, year=as.numeric(year), deaths=as.numeric(deaths), population=as.numeric(population), crude_death_rate=as.numeric(crude_death_rate))
 str(drugDataFrame)
 ```
@@ -49,7 +50,7 @@ str(drugDataFrame)
 
 Data analysis to determine if a difference between sex and drug poisonings exists amongst all ages and all races. 
 
-```{r data exploration}
+```{r create new variable}
 library(knitr)
 library(dplyr)
 
@@ -63,13 +64,31 @@ males<-drugDataFrame %>% select( year,sex,age,race_hispanic_origin,deaths,popula
 allSexes<-cbind(females,males)
 
 #rename columns
-names(allSexes)[7]<-"crude_death_rate_females"
-names(allSexes)[14]<-"crude_death_rate_males"
+names(allSexes)[7]<-"female crude death rate"
+names(allSexes)[14]<-"male crude death rate"
+names(allSexes)[4]<-"race/hispanic origin"
+names(allSexes)[4]<-"race/hispanic origin"
 
 #create new variable 
-allSexes$diff_in_female_vs_male_crude_death_rate<-allSexes$crude_death_rate_females - allSexes$crude_death_rate_males
+allSexes$`difference in female vs male crude death rate`<-allSexes$`female crude death rate`-allSexes$`male crude death rate`
 
-knitr::kable(allSexes)
+library(DT)
+datatable(allSexes, rownames=FALSE,caption="Drug Poisioning Deaths Females vs Males for All Ages and All Races")
 
+```
+
+```{r bar plot}
+
+library(ggplot2)
+
+#boxplot female vs male crude death rate
+ggplot(drugDataFrame %>% filter(sex=="Female" | sex=="Male"), aes(x=sex, y=crude_death_rate)) + geom_boxplot() + ggtitle("Boxplot for Crude Death") +ylab("Crude Death Rate") +xlab("Sex")
+
+```
+
+```{r scatterplot, fig.height=15, fig.width=1}
+#deaths vs population scatterplot
+
+ggplot(drugDataFrame %>% filter(sex=="Female" | sex=="Male"),aes(x=population, y=deaths, group=sex)) + geom_point(aes(color=sex),size=2) + facet_wrap(~year)+ theme_grey(base_size=22)
 ```
 
