@@ -11,55 +11,38 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction to JSON
 
-JavaScript Object Notation (JSON) is a syntax for storing and exchanging data. It is important to note that JSON _is_ text -- text that has been written in Javascript Object Notation. What this means is that we can convert any Javascript object in JSON, and convert any JSON received into a Javascript object. For this reason, Javascript is commonly used in web development, where data is being exchanged between a browser and a server. Another important result of JSON being text is that it makes it language independent. This is because the text itself can be used by any programming language.   [(W3schools)](https://www.w3schools.com/js/js_json_intro.asp). For this reason, it is possible to work with JSON data within R.
-
-Describe your type of data (JSON or XML). What is it, where does it get used, and why is it a good
-way to store data? This should be detailed enough that someone that hasn’t seen that type of idea
-would have a good idea what they are dealing with. You should link to references where applicable.
-
-
-
-```{r cars}
-
-```
+JavaScript Object Notation (JSON) is a syntax for storing and exchanging data. It is important to note that JSON _is_ text -- text that has been written in Javascript Object Notation. What this means is that we can convert any Javascript object in JSON, and convert any JSON received into a Javascript object. For this reason, Javascript is commonly used in web development, where data is being exchanged between a browser and a server. Another important result of JSON being text is that it makes it language independent. This is because the text itself can be used by any programming language.   [(W3schools)](https://www.w3schools.com/js/js_json_intro.asp). For this reason, it is possible to work with JSON data within R, as well as other lanugages such as Python. This makes JSON a popular format to store data in.
 
 ## R packages
 
-Discussion of possible packages/functions that are available for reading your type of data into R. Choose one and explain why you’ve chosen it.
-
 Three popular packages for working with JSON data in R are [`jsonlite`](https://cran.r-project.org/package=jsonlite), [`RJSONIO`](https://cran.r-project.org/web/packages/RJSONIO/) and [`rjson`](https://cran.r-project.org/web/packages/rjson/) (click on package name to view info on CRAN). 
 
-I have chosen to work with the `jsonlite` package as it has been optimized for statistical data and the web. It also has very good documentation and lots of good examples on the web. More information on some of the differences between these three packages can be found [by clicking here](https://rstudio-pubs-static.s3.amazonaws.com/31702_9c22e3d1a0c44968a4a1f9656f1800ab.html).
+The primary difference between the packages is how they handle reading/writing JSON data. JSON data can come in a variety of different forms, which can be read into R differently. For example, `jsonlite` might read a certain JSON object in as a data frame, whereas `rjson` would read it as a list. It is interesting to note that `jsonlite` actually started out as a fork of `RJSONIO`, but has since been completely rewritten. An in-depth paper on the rationale used in creating the `jsonlite` package can be found on [arXiv](https://arxiv.org/abs/1403.2805).
 
-```{r}
+We have chosen to work with the `jsonlite` package as it has been optimized for statistical data and the web. It also has very good documentation and lots of good examples on the web. More information on some of the differences between these three packages can be found [by clicking here](https://rstudio-pubs-static.s3.amazonaws.com/31702_9c22e3d1a0c44968a4a1f9656f1800ab.html).
 
-```
 
 ## The Data
 
 ### Description of dataset
 
-Find a dataset of your type (JSON or XML) and describe where you found the data, how the data was
-collected, what the variables are, etc.
-
-The dataset I chose to use is one containing reported fireball events from NASA. According to [the documentation](https://cneos.jpl.nasa.gov/fireballs/intro.html), "*fireballs and bolides are astronomical terms for exceptionally bright meteors that are spectacular enough to to be seen over a very wide area*". The data was collected from U.S. government sensors. It is not meant to be a complete list, as only the brightest fireballs are noted. 
+The dataset we chose to use is one containing reported fireball events from NASA. According to [the documentation](https://cneos.jpl.nasa.gov/fireballs/intro.html), "*fireballs and bolides are astronomical terms for exceptionally bright meteors that are spectacular enough to to be seen over a very wide area*". The data was collected from U.S. government sensors. It is not meant to be a complete list, as only the brightest fireballs are noted. 
 
 The variables include information on the date and time of each fireball event, its geographic location, its altitude and velocity at peak brightness, its approximate total optical radiated energy and its calculated total impact energy. More information can be found on NASA's [description page](https://cneos.jpl.nasa.gov/fireballs/intro.html) as well on on the [API documentation page](https://ssd-api.jpl.nasa.gov/doc/fireball.html). The table of fields from the documentation has been reproduced below.
 
-```{r graphics, out.width = "400px", echo = FALSE} 
+```{r graphics, echo = FALSE} 
 knitr::include_graphics("./FireballFields.jpg")
 ```
 
 
 ### Reading in the data
 
-Read in the data set describing the options your package’s functions allow.
-
 The `jsonlite` package has a `fromJSON()` function that allows us to convert JSON data to R objects. The R object that gets created depends on the structure of the 
 JSON. We can see below that fireball data gets read in as a list of 4 objects.
 
 ```{r,warning=FALSE,message=FALSE}
 library(jsonlite)
+
 fire <- fromJSON("https://ssd-api.jpl.nasa.gov/fireball.api")
 str(fire)
 ```
@@ -85,29 +68,19 @@ fire <- as_tibble(fire)
 fire$date <- as.Date(fire$date)
 numeric_cols <- c("energy","impact-e","lat","lon","alt","vel")
 fire[,numeric_cols] <- sapply(fire[,numeric_cols], as.numeric)
+
+head(fire)
 ```
 
 ## Exploratory Analysis
 
 ### Creating New Variables
 
-Perform basic exploratory data analysis that reveals a meaningful idea that you would reasonable want
-to investigate further. Not all things reported need to show something meaningful (i.e. graphs that
-show no relationship are fine) but you should end up with a solid lead that you would pursue further.
-
-– At some point you should create a useful function(s) to do something meaningful with the data or
-customize the way you read the data in.
-– You should create a new variable.
-– You should create some contingency tables and numeric summaries by some of your categorical
-variables
-– You should create some plots (at least a side-by-side bar plot, side-by-side box plots, and scatter
-plots with coloring)
-
-
-To start exploring the data, a few additional columns would be helpful. Since we have the latitude and longitude, it would be nice to know more information on where these events occured. Thankfully, R has a package for that! The `revgeo` package allows you to do reverse geocoding, in which you input the coordinates and the geographical information is returned (city, state, etc.). For purposes of this analysis we only care about the country, which we can specify using the *item* argument. More information on the `revgeo` package can be found [on CRAN](https://cran.r-project.org/web/packages/revgeo/). Note this process can take a few minutes as it must run for each observation in our dataset. 
+To start exploring the data, a few additional variables would be helpful. Since we have the latitude and longitude, it would be nice to know more information on where these events occured. Thankfully, R has a package for that! The `revgeo` package allows you to do reverse geocoding, in which you input the coordinates and the geographical information is returned (city, state, etc.). For purposes of this analysis we only care about the country, which we can specify using the *item* argument. More information on the `revgeo` package can be found [on CRAN](https://cran.r-project.org/web/packages/revgeo/). Note this process can take a few minutes as it must run for each observation in our dataset. 
 
 ```{r,eval=FALSE}
 library(revgeo)
+
 countries <- revgeo(longitude=fire$lon, latitude=fire$lat, provider = 'photon', output = 'hash',item='country')
 countries <- countries$country
 
@@ -128,40 +101,42 @@ fire$year <- as.numeric(format(fire$date,'%Y'))
 fire$month <- as.numeric(format(fire$date,'%m'))
 fire$direction <- paste0(fire$`lat-dir`,fire$`lon-dir`)
 ```
-Lastly, lets break up some our numeric variables. We'll create a function that makes this easy to do. The function `addPercentile()` takes a data frame, a variable, and a number indicating how many groups we want to break the variable into. It then returns the data frame with the new variable added. 
+Lastly, lets break up some of our numeric variables. We'll create a function that makes this easy to do. The function `addPercentile()` takes a data frame, a variable, and a number indicating how many groups we want to break the variable into. It then returns the data frame with the new variable added. 
 
 ```{r}
 addPercentile <- function(df,var,n=4) {
-        
-        #make sure the input is valid
-        if(!(any(class(df) %in% c("data.frame","tbl", "tbl_df")))){
-                stop("Must supply a data frame/tibble")
-        }
-        
-        if(!(var %in% names(df))){
-                stop(paste("Variable",var,"not found in data frame"))
-        }
-        
-        if(n%%1!=0){
-                stop("Must supply an integer for the number of breaks")
-        }
-        
-        #Use ntile() to create new groups
-        df[,paste0(var,"_group")] <- paste("Group",ntile(df[[var]],n))
-        
-        return(df)
+  
+  #make sure the input is valid
+  if(!(any(class(df) %in% c("data.frame","tbl", "tbl_df")))){
+    stop("Must supply a data frame/tibble")
+  }
+  
+  if(!(var %in% names(df))){
+    stop(paste("Variable",var,"not found in data frame"))
+  }
+  
+  if(n%%1!=0){
+    stop("Must supply an integer for the number of breaks")
+  }
+  
+  #Use ntile() to create new groups
+  df[,paste0(var,"_group")] <- paste("Group",ntile(df[[var]],n))
+  
+  return(df)
 }
 ```
 
 Now we can add the new grouping variables to our data frame, using the default of 4 which will give us quartiles. You can see that when we create a contingency table for the energy group, we have about 25% of the data falling in to each bucket as expected.
 
 ```{r}
+library(knitr)
+
 fire <- addPercentile(fire,"energy")
 fire <- addPercentile(fire,"impact-e")
 fire <- addPercentile(fire,"alt")
 fire <- addPercentile(fire,"vel")
 
-prop.table(table(fire$energy_group))
+kable(prop.table(table(fire$energy_group)),col.names = c("Energy Group","%"))
 ```
 
 ### Data Tables
@@ -169,7 +144,6 @@ prop.table(table(fire$energy_group))
 Now that we have the new variables, we can do some more exploratory analysis. Lets see how many fireball events we have by country and year/month, as well as the percentage of events in each direction. 
 
 ```{r,warning=FALSE,message=FALSE}
-library(knitr)
 kable(table(fire$country),caption = "Fireballs by Country", col.names = c("Country","Freq"))
 kable(table(fire$year,fire$month),caption = "Fireballs by Year and Month")
 kable(prop.table(table(fire$direction)),caption = "Percentage of Fireballs by Direction",col.names = c("Direction","%"))
@@ -177,7 +151,7 @@ kable(prop.table(table(fire$direction)),caption = "Percentage of Fireballs by Di
 
 We can see that no country was found for the vast majority of our events. This is likely because most of them occured over the ocean and not over any specific country, or else no latitude/longitude information was recorded. 
 
-In regards to the date of observation, it is interesting to note that there were 7 fireball events recorded in May this year, which is one of the highest monthly totals! 
+In regards to the date of observation, it is interesting to note that there were 7 fireball events recorded in May this year (2019), which is one of the highest monthly totals! 
 
 Lastly, we see that a roughly similar proportion of fireballs were moving in each direction, which is what we would expect if the direction is random (any fireballs where the direction was not recorded show as *NANA*).
 
@@ -185,13 +159,17 @@ Lastly, we see that a roughly similar proportion of fireballs were moving in eac
 
 Now lets plot some graphs. Please note in the charts below that any events with missing data for a variable being plotted are removed from the data. 
 
-It might be that fireballs traveling at a higher velocity have a higher energy. We can look at this relationship using a boxplot. If we plot velocity on the y-axis, and the energy group on the x-axis, we see the following.
+It might be that fireballs traveling at a higher velocity have a higher energy. We can look at this relationship using a boxplot. If we plot velocity on the y-axis, and the energy group on the x-axis, we see the following:
 
 ```{r,warning=FALSE}
 g1 <- ggplot(fire, aes(x = energy_group, y = vel)) +
-        geom_boxplot(fill = "white") +
-        geom_point(aes(colour = energy_group),position = "jitter") +
-        labs(x = "Energy Group", y = "Velocity", title = "Velocity by Energy Group", colour = "Energy Group")
+  geom_boxplot(fill = "white") +
+  geom_point(aes(colour = energy_group),position = "jitter") +
+  labs(x = "Energy Group",
+       y = "Velocity", 
+       title = "Velocity by Energy Group",
+       colour = "Energy Group")
+
 print(g1)
 ```
 
@@ -200,27 +178,39 @@ While the median velocity for energy groups 3 and 4 is slightly higher than for 
 We can also take a look and see if the fireballs moving in a particular direction are more likely to be observed during a certain month of the year (possibly due to the rotation of the earth).
 
 ```{r,warning=FALSE}
-bar <- ggplot(data = fire, aes(x = month)) + geom_bar(aes(fill = direction),position = "dodge") + labs(x = "Month", fill = 'Direction') + scale_x_continuous("Month",breaks=seq(1,12,1))
+bar <- ggplot(data = fire, aes(x = month)) + 
+  geom_bar(aes(fill = direction),position = "dodge") + 
+  labs(x = "Month", fill = 'Direction') + 
+  scale_x_continuous("Month",breaks=seq(1,12,1))
+
 plot(bar)
 ```
 
-There doesn't appear to be much of a relationship.
+There doesn't appear to be much of a relationship in the chart above either.
 
-It is possible that fireballs at a higher altitude have more velocity since there is less resistance from the atmosphere. We can look at this relationship using a scatterplot. We can also check if there is a relationship between altitude and energy.
+It is possible that fireballs at a higher altitude have more velocity since there is less resistance from the atmosphere. We can look at this relationship using a scatterplot. We can also check if there is a relationship between altitude and energy, by plotting a scatterplot of altitude vs. energy for each energy group.
 
 ```{r,warning=FALSE}
 g2 <- ggplot(fire, aes(x = vel, y = alt)) + 
-        geom_point((aes(colour = vel_group))) + 
-        geom_smooth(method="lm",colour="black") + 
-        labs(x = "Velocity", y = "Altitude", title = "Altitude vs. Velocity Relationship", colour = "Velocity Group")
+  geom_point((aes(colour = vel_group))) + 
+  geom_smooth(method="lm",colour="black") + 
+  labs(x = "Velocity", 
+       y = "Altitude", 
+       title = "Altitude vs. Velocity Relationship", 
+       colour = "Velocity Group")
+
 print(g2)
 
 
 g3 <- ggplot(fire, aes(x = energy, y = alt)) + 
-        geom_point((aes(colour = energy_group))) + 
-        facet_wrap(~ energy_group, scales = "free") +
-        geom_smooth(method="lm",colour="black") + 
-        labs(x = "Energy", y = "Altitude", title = "Altitude vs. Energy Relationship", colour = "Energy Group")
+  geom_point((aes(colour = energy_group))) + 
+  facet_wrap(~ energy_group, scales = "free") +
+  geom_smooth(method="lm",colour="black") + 
+  labs(x = "Energy", 
+       y = "Altitude", 
+       title = "Altitude vs. Energy Relationship", 
+       colour = "Energy Group")
+
 print(g3)
 ```
 
@@ -230,14 +220,18 @@ Lastly, let's take a look at Energy vs. Impact energy. There is likely a relatio
 
 ```{r,warning=FALSE}
 g4 <- ggplot(fire, aes(x = energy, y = `impact-e`)) + 
-        geom_point((aes(colour = `impact-e_group`))) + 
-        geom_smooth(method="lm",colour="black") + 
-        facet_wrap(~ `impact-e_group`,scales = "free") +
-        labs(x = "Energy", y = "Impact Energy", title = "Energy vs. Impact Energy")
+  geom_point((aes(colour = `impact-e_group`))) + 
+  geom_smooth(method="lm",colour="black") + 
+  facet_wrap(~ `impact-e_group`,scales = "free") +
+  labs(x = "Energy", 
+       y = "Impact Energy", 
+       title = "Energy vs. Impact Energy", 
+       colour = "Impact Energy Group")
+
 print(g4) 
 ```
 
-We can see there is a strong linear relationship between energy and impact energy.
+We can see there is a strong linear relationship between energy and impact energy across the different groups.
 
 ## Conclusion
 
