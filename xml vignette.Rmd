@@ -49,7 +49,6 @@ Estimates are collected based on the National Vital Statistics System multiple c
 
 The selected demographic characteristics variables are "year", "sex","age","race_hispanic_origin","state","deaths","population","crude_death_rate","standard_error_for_crude_rate","low_confidence_limit_for_crude_rate","upper_confidence_limit_for_crude_rate","us_crude_rate","us_age_adjusted_rate". 
 
-# (?? eo: what does it mean "read in the data set describing the options your pakcages's functions allow"? do we need to have discussion of this part? my understanding is we just need to read the xml data)  
 
 ```{r read in data, include=FALSE}
 
