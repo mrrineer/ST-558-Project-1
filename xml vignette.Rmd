@@ -36,7 +36,7 @@ The data set pertains to drug poisoning deaths at the U.S. and state level. The 
 
 Estimates are collected based on the National Vital Statistics System multiple cause-of-death mortality files. Populations used for computing death rates for census years (2011-2015) are postcensal estimates based on the 2010 U.S. census, while for noncensus years (before 2010) population is revised using updated intercensal population estimates.  
 
-The selected demographic characteristics variables are "year", "sex","age","race_hispanic_origin","state","deaths","population","crude_death_rate","standard_error_for_crude_rate","low_confidence_limit_for_crude_rate","upper_confidence_limit_for_crude_rate","us_crude_rate","us_age_adjusted_rate".  
+The selected demographic characteristics variables are "year", "sex", "age", "race_hispanic_origin", "state", "deaths", "population", "crude_death_rate", "standard_error_for_crude_rate", "low_confidence_limit_for_crude_rate", "upper_confidence_limit_for_crude_rate", "us_crude_rate","us_age_adjusted_rate".  
 
 ```{r read in data, include=FALSE}
 
