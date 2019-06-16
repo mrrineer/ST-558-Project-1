@@ -37,7 +37,7 @@ Extensible Markup Language (XML) is a means of storing data on the internet so t
 * Increased accessability for data exchange across businesses and customers  
 * Expresses metadata in a portable, resuable format  
 
-# R Packages/functions for XML Data  
+## R Packages/functions for XML Data  
 
 "XML" package written by Duncan Temple Lang, it is available on CRAN-R and is one of the easier ways to parse, process and generate XML data with R. There are other packages such as `xml2()` and `xslt()`, some people on GitHub highly recommonded xml2() produced by Hadley Wickham, it has a simpler interface with great simplicity vs power balance and makes everything clean and tidy, but here we applied the traditional xml(). The xml file is read by R using the function **xmlParse()**, it is stored as a list in R. To handle the data effectively in large files we read the data in the xml file as a data frame by using function **xmlToDataFrame()**. Then we can process the data frame for data analysis.
 
@@ -71,7 +71,7 @@ drugDataTbl <- tbl_df(drugDataFrame)
 
 ```
 
-# Exploratory Data Analysis  
+## Exploratory Data Analysis  
 
 Data analysis to determine if a difference between sex and drug poisonings exists amongst all ages and all races. Conclusion: For all ages and races, females have a lower drug poisoning crude death rate than males.
 
